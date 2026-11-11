@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,7 +10,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f2f2f2;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2.5rem 1rem}
 .top-bar{width:100%;max-width:620px;display:flex;align-items:center;margin-bottom:1.5rem}
-.logo{display:flex;align-items:center;gap:10px}
 .logo-text{font-size:18px;font-weight:700;color:#1b1b1b;letter-spacing:-0.3px}
 .logo-sub{font-size:11px;color:#888}
 .card{background:#fff;border-radius:16px;border:1px solid #e8e8e5;padding:2rem;width:100%;max-width:620px;margin-bottom:1rem}
@@ -58,11 +59,9 @@ input:focus,select:focus{outline:none;border-color:#fa345e;box-shadow:0 0 0 3px 
 <body>
 
 <div class="top-bar">
-  <div class="logo">
-    <div>
-      <div class="logo-text">Formulario Rendición de Gastos – Reembolso</div>
-      <div class="logo-sub">Apprecio</div>
-    </div>
+  <div>
+    <div class="logo-text">Formulario Rendición de Gastos – Reembolso</div>
+    <div class="logo-sub">Apprecio</div>
   </div>
 </div>
 
@@ -77,18 +76,18 @@ input:focus,select:focus{outline:none;border-color:#fa345e;box-shadow:0 0 0 3px 
       <label>Correo corporativo *</label>
       <input type="email" id="correo-trabajador" placeholder="trabajador@apprecio.com" required>
     </div>
-    <div class="form-group">
-      <label>País *</label>
-      <select id="pais" required onchange="onPaisChange()">
-        <option value="">Selecciona...</option>
-        <option value="Chile">Chile</option>
-        <option value="Perú">Perú</option>
-        <option value="Colombia">Colombia</option>
-        <option value="México">México</option>
-        <option value="Estados Unidos">Estados Unidos</option>
-        <option value="España">España</option>
-      </select>
-    </div>
+  </div>
+  <div class="form-group">
+    <label>País *</label>
+    <select id="pais" required onchange="onPaisChange()">
+      <option value="">Selecciona...</option>
+      <option value="Chile">Chile</option>
+      <option value="Perú">Perú</option>
+      <option value="Colombia">Colombia</option>
+      <option value="México">México</option>
+      <option value="Estados Unidos">Estados Unidos</option>
+      <option value="España">España</option>
+    </select>
   </div>
   <div class="divider"></div>
   <div class="section-title">Aprobación</div>
@@ -189,6 +188,25 @@ function agregarGasto(){
         </div>
         <div class="rate-src" id="rate-src-${id}">Open Exchange Rates</div>
       </div>
+    </div>
+    <div class="form-row" style="margin-bottom:10px">
+      <div class="form-group" style="margin-bottom:0">
+        <label>Tipo de documento *</label>
+        <select id="tipo-${id}">
+          <option value="">Selecciona...</option>
+          <option value="Boleta">Boleta</option>
+          <option value="Factura">Factura</option>
+          <option value="Comprobante">Comprobante</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>N° de documento *</label>
+        <input type="text" id="numdoc-${id}" placeholder="Ej: 123456">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label>Proveedor *</label>
+      <input type="text" id="prov-${id}" placeholder="Ej: Restaurante La Plaza">
     </div>
     <div class="form-group" style="margin-bottom:10px">
       <label>Descripción *</label>
@@ -299,19 +317,22 @@ function showMsg(type, txt){
 
 async function enviarRendicion(){
   const nombre = document.getElementById('nombre').value.trim();
+  const correoTrabajador = document.getElementById('correo-trabajador').value.trim();
   const pais = document.getElementById('pais').value;
   const correoAprobador = document.getElementById('correo-aprobador').value.trim();
   const nombreAprobador = document.getElementById('nombre-aprobador').value.trim();
   const monedaLocal = getMonedaLocal();
-  const correoTrabajador = document.getElementById('correo-trabajador').value.trim();
-  if(!nombre||!pais||!correoTrabajador||!correoAprobador||!nombreAprobador){ showMsg('error','Completa todos los datos del trabajador y aprobador'); return; }
+  if(!nombre||!correoTrabajador||!pais||!correoAprobador||!nombreAprobador){ showMsg('error','Completa todos los datos del trabajador y aprobador'); return; }
   if(gastos.length===0){ showMsg('error','Agrega al menos un gasto'); return; }
   for(const g of gastos){
     const monto = document.getElementById('monto-'+g.id)?.value;
-    const desc = document.getElementById('desc-'+g.id)?.value;
+    const desc = document.getElementById('desc-'+g.id)?.value.trim();
     const moneda = document.getElementById('moneda-'+g.id)?.value;
     const fecha = document.getElementById('fecha-'+g.id)?.value;
-    if(!monto||!desc||!moneda||!fecha){ showMsg('error',`Completa todos los campos del gasto #${g.id}`); return; }
+    const tipo = document.getElementById('tipo-'+g.id)?.value;
+    const numdoc = document.getElementById('numdoc-'+g.id)?.value.trim();
+    const prov = document.getElementById('prov-'+g.id)?.value.trim();
+    if(!monto||!desc||!moneda||!fecha||!tipo||!numdoc||!prov){ showMsg('error',`Completa todos los campos del gasto #${g.id}`); return; }
   }
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
@@ -326,6 +347,9 @@ async function enviarRendicion(){
       const moneda = document.getElementById('moneda-'+g.id).value;
       const fecha = document.getElementById('fecha-'+g.id).value;
       const desc = document.getElementById('desc-'+g.id).value.trim();
+      const tipo = document.getElementById('tipo-'+g.id).value;
+      const numdoc = document.getElementById('numdoc-'+g.id).value.trim();
+      const prov = document.getElementById('prov-'+g.id).value.trim();
       const esLocal = moneda === monedaLocal;
       const montoLocal = esLocal ? monto : (g.rate && monto ? parseFloat((monto * g.rate).toFixed(2)) : '');
       const tasaCambio = esLocal ? 1 : (g.rate ? parseFloat(g.rate.toFixed(6)) : '');
@@ -343,6 +367,9 @@ async function enviarRendicion(){
       fd.append('moneda_original', moneda);
       fd.append('monto_original', monto);
       fd.append('descripcion', desc);
+      fd.append('tipo_documento', tipo);
+      fd.append('numero_documento', numdoc);
+      fd.append('proveedor', prov);
       fd.append('moneda_local', monedaLocal);
       fd.append('tasa_cambio', tasaCambio);
       fd.append('monto_local', montoLocal);
@@ -351,6 +378,7 @@ async function enviarRendicion(){
     }
     showMsg('success','Rendición enviada correctamente. Tu aprobador recibirá un correo de notificación.');
     document.getElementById('nombre').value='';
+    document.getElementById('correo-trabajador').value='';
     document.getElementById('pais').value='';
     document.getElementById('correo-aprobador').value='';
     document.getElementById('nombre-aprobador').value='';
